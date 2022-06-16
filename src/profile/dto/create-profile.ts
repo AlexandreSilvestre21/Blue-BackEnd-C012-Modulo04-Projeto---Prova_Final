@@ -5,16 +5,18 @@ export class CreateProfileDto {
   @IsString()
   @Length(3, 12)
   @ApiProperty({
-    description: 'Nome de usuario',
-    example: 'Tomas',
+    description: 'Nome ',
+    example: 'Fernanda',
   })
-  user: string;
+  title: string;
 
   @IsUrl()
   @ApiProperty({
-    description: 'Nome do Usuario',
-    example: 'Mario',
+    description: 'Categoria',
+    example:
+      'NoAdmin',
   })
+  imageUrl: string;
 
 
 }

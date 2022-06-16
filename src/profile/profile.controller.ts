@@ -14,6 +14,7 @@ import {
   import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
   import { LoggedUser } from 'src/auth/logged-user.decorator';
   import { User } from 'src/user/entities/user.entity';
+import { CreateProfileDto } from './dto/create-profile';
   import { UpdateProfileDto } from './dto/update-profile';
   import { Profile } from './entities/profile.entity';
   import { ProfileService } from './profile.service';

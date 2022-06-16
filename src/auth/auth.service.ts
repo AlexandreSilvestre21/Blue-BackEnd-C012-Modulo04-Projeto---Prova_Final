@@ -1,22 +1,39 @@
-import { Module } from '@nestjs/common';
-import { AuthService } from 'src/auth/auth.service';
-import { AuthController } from './auth.controller';
-import { PrismaModule } from 'src/prisma/prisma.module';
-import { JwtModule } from '@nestjs/jwt';
-import { PassportModule } from '@nestjs/passport';
-import { JwtStrategy } from './jwt.strategy';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { LoginResponseDto } from './dto/login-response.dto';
+import { LoginDto } from './dto/login.dto';
 
-@Module({
-  imports: [
-    PrismaModule,
-    PassportModule.register({ defaultStrategy: 'jwt' }),
-    JwtModule.register({
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '12h' },
-    }),
-  ],
-  controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
-})
-export class AuthModule {}
 
+@Injectable()
+export class AuthService {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly jwtService: JwtService,
+  ) {}
+
+  async login(loginDto: LoginDto): Promise<LoginResponseDto> {
+    const { email, password } = loginDto;
+
+        const user = await this.prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+      throw new UnauthorizedException('Usuário e/ou senha inválidos');
+    }
+
+
+    const isHashValid = await bcrypt.compare(password, user.password);
+
+    if (!isHashValid) {
+      throw new UnauthorizedException('Usuário e/ou senha inválidos');
+    }
+
+    delete user.password;
+
+    return {
+      token: this.jwtService.sign({ email }),
+      user,
+    };
+  }
+}
